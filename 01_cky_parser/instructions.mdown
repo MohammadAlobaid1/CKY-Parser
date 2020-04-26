@@ -1,0 +1,41 @@
+A CKY Parser
+============
+
+Background
+----------
+
+This continues the exercise where you had to implement a CKY recognizer.
+
+Your task
+---------
+
+Extend your CKY recognizer with backpointers to get a proper CKY parser.
+
+**Optional:** add a function that decompiles the parse forest encoded in the chart into a list of parse tree.
+You may implement the trees any way you want (NLTK, nested lists, Gorn tree domains, and so on).
+
+Hints
+-----
+
+Backpointers can be handled in many ways, but here's one that's relatively easy.
+It assumes that you implemented the chart as a dictionary as described in the previous exercise.
+So the chart
+
+```
+   |   1  |    2    |
+0  |  NP  |      S  |
+1  |      |  VP,AP  |
+```
+
+would be the dictionary `{(0,1): ["NP"], (1,2): ["VP", "AP"], (0,2): ["S"]}`.
+To add backpointers, you want to replace each part of speech with a triple of the form `("POS", (key, index), (key, index))`.
+Each `(key, index)` pair is a backpointer, where `key` points to the relevant cell in the chart and `index` picks out the correct entry from the list.
+For entries that are inferred from terminal symbols, we replace each pair with `None`.
+The example dictionary above would then look as follows:
+
+```python
+{(0,1): [("NP", None, None)],
+ (1,2): [("VP", None, None), ("AP", None, None)],
+ (0,2): [("S", ((0,1), 0), ((1,2), 0))],
+}
+```

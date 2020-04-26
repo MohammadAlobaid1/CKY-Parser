@@ -1,0 +1,58 @@
+A CKY Recognizer
+================
+
+Background
+----------
+
+A recognizer tells you for any given string whether it is well-formed according to some generating device (e.g. an FSA or a CFG).
+Parsers are essentially recognizers that are equipped with a data structure that allows them to keep track of how they determined a string to be well-formed or ill-formed, and from this record one can then construct the parse tree.
+
+For instance, the CKY algorithm in its simplest form is actually a recognizer.
+It accepts a string iff the top right corner of the CKY chart is filled with an S.
+In order to get a CKY parser rather than a CKY recognizer, one has to extend the chart such that each entry in a cell doesn't just store the non-terminal symbol but complex backpointers.
+For example, it isn't enough to just store "there is a DP from 1 to 4", we also need backpointers that tell us that this DP is built from a Det from 1 to 2 and an NP from 2 to 4.
+And then one still needs to construct a parse tree from those backpointers.
+
+Your task
+---------
+
+Implement a CKY recognizer.
+Since it is a recognizer, it does not need backpointers, it is enough to determine whether the top right corner of the chart contains an `S`. 
+The recognizer uses the following inference rules:
+
+- If we have `[i, Y, j]` and `[j, Z, k]`, and the grammar contains a rule `X -> Y Z`, then infer `[i, X, k]`.
+- If `a` is a terminal symbol at position `i`, and the grammar contains a rule `X -> a`, then infer `[i, X, i+1]`.
+
+The `.py` file in this folder already includes an example grammar in Chomsky Normal Form and a function with example sentences that you can use to test the correctness of your CKY recognizer.
+
+Hints
+-----
+
+1.  You do not need to implement the inference rules in a literal fashion.
+    You can write any function you want as long as it captures the same behavior --- that is to say, it infers the same categories as the inference rules above.
+
+1.  The example grammar consists of two components.
+    One is a lexicon, which is a dictionary of the form ${"POS": ["list", "of", "words"]}$.
+    The other is a tuple of rewrite rules, each one of which is of the form `("Lefthand-side", ("symbol 1 of righthand side", "symbol 2 of righthand side"))`.
+    For instance, `NP -> Det NP` is written as `("NP", ("Det", "NP"))`, and `NP -> Det N` is written as `("NP", ("Det", "N"))`.
+
+    You should convert the grammar's tuple of rewrite rules into a more usable format first.
+    I suggest a dictionary of the form `{'symbol 1': {'symbol 2': 'lefthand side'}}`.
+    So instead of `("NP", ("Det", "NP"))` and `("NP", ("Det", "N"))`, you'd have `{"Det": {"N": "NP", "NP": "NP"}}`.
+    This format is more useful for the CKY recognizer's bottom-up inference.
+    Similarly, you probably want to convert the lexicon to the format `{'word': ["list", "of", "parts of speech"]}`.
+
+1.  You can treat the CKY chart as a dictionary where keys are of the form `(start_position, end_position)` and values are lists of non-terminals.
+    Suppose, for instance, that you have the chart below:
+
+    ```
+       |   1  |    2    |
+    0  |  NP  |      S  |
+    1  |      |  VP,AP  |
+    ```
+
+    That would correspond to the dictionary `{(0,1): ["NP"], (1,2): ["VP", "AP"], (0,2): ["S"]}`.
+
+1.  In order to accept the string, you have to
+    1. find the key that is the top-right corner of the chart, and
+    1. check that the corresponding value is a list containing `"S"`.
