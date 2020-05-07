@@ -12,7 +12,7 @@ def cky_recognize(string, grammar, lexicon):
 
 
 def cky_matrix(string, grammar, lexicon):
-    """A CKY recognizer that return a matrix and a backpointer.
+    """CKY recognizer to determine well-formedness of string.
     The string is assumed to be tokenized and lowercased already, e.g.
     ["the", "man", "water", "s", "the", "flower", "s"]
     """
@@ -20,7 +20,6 @@ def cky_matrix(string, grammar, lexicon):
     cky_list = []
     string_len = len(string)
     matrix = [[[] for x in range(string_len)] for y in range(string_len)]
-    
 
     for index in range(string_len):
       if not lexicon.get(string[index],None):
@@ -33,9 +32,6 @@ def cky_matrix(string, grammar, lexicon):
           backpointer[(index,index)] = [(x,None,None)]
         else:
           backpointer[(index,index)].append((x,None,None))
-
-        #if backpointer.get((index,index)) == None else backpointer[(index,index)].append((x,None,None))
-
     i = 1
     j = 0
     start_x = 0 
@@ -71,7 +67,8 @@ def cky_matrix(string, grammar, lexicon):
                   if backpointer.get((x,y)) == None:
                     backpointer[(x,y)]= [(state2,((x,x+j),index1),((x+i,y),index2))]
                   else:
-                    backpointer[(x,y)].append((state2,((x,x+j),index1),((x+i,y),index2)))                      
+                    backpointer[(x,y)].append((state2,((x,x+j),index1),((x+i,y),index2)))
+                            
           i+=1
           j+=1
 
@@ -84,10 +81,9 @@ def cky_matrix(string, grammar, lexicon):
         j = 0
 
       start_y += 1
-
       if string_len < 1:
         done = True
-      
+
     log = ""
     y = 0
 
@@ -117,9 +113,7 @@ def convert_grammar(grammar):
       else:
         new_grammar[symbol1] = {symbol2: q1}
         
-
     return new_grammar
-
 
 def convert_lexicon(lexicon):
     '''A method to convert lexicon to dict'''
@@ -133,7 +127,6 @@ def convert_lexicon(lexicon):
           new_lexicon[word] = [key]
            
     return new_lexicon
-
 
 def test_cky(sentence=None):
     """Test cky_recognize.
@@ -208,3 +201,8 @@ def test_cky(sentence=None):
                 print("Wrong output!")
                 print(f"The following sentence should be {val}")
                 print(s)
+
+#convert_grammar(grammar)
+#convert_lexicon(lexicon)
+#cky_recognize("the old man the boat".split(), convert_grammar(grammar),convert_lexicon(lexicon))
+#cky_matrix("the ugly water slide s rust".split(), convert_grammar(grammar),convert_lexicon(lexicon))
